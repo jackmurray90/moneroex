@@ -1,4 +1,5 @@
 {% load static %}
+{% load tags %}
 <style>
   html, body { margin: 0; padding: 0; }
   form { width: 30em; margin: 10em auto; }
@@ -6,7 +7,7 @@
   input[type=submit] { padding: 1em; }
   #swap { border: none; padding: 1em 0; margin: 0; background-color: #fff; }
 </style>
-<p>Order {{ order.id }} to exchange {{ order.payment_amount }} {{ order.payment_asset.code }} for {{ order.payout_amount }} {{ order.payout_asset.code }}.</p>
+<p>Order {{ order.id }} to exchange {{ order.payment_amount|asset:order.payment_asset }} for {{ order.payout_amount|asset:order.payout_asset }}.</p>
 <form method="post">
   {% csrf_token %}
 </form>

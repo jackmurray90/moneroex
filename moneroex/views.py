@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import Http404
 from django.views import View
 from urllib.request import urlopen
 from json import loads
 from decimal import Decimal, InvalidOperation
+from django.contrib import messages
 from moneroex.models import Asset, Order, MAX_AMOUNT
 from moneroex.util import random_128_bit_string
 from datetime import datetime, timezone, timedelta
@@ -36,19 +37,19 @@ class IndexView(View):
             any(c not in "0123456789." for c in request.POST[d])
             for d in ["send", "receive"]
         ):
-            messages.error("Please enter numbers only")
+            messages.error(request, "Please enter numbers only")
             return redirect("index")
         try:
             payment = Decimal(request.POST["send"])
             payout = Decimal(request.POST["receive"])
         except InvalidOperation:
-            messages.error("Please enter valid numbers only (e.g. 12345.6789)")
+            messages.error(request, "Please enter valid numbers only (e.g. 12345.6789)")
             return redirect("index")
         if payment > MAX_AMOUNT or payout > MAX_AMOUNT:
-            messages.error(f"Please enter less than {MAX_AMOUNT}")
+            messages.error(request, f"Please enter less than {MAX_AMOUNT}")
             return redirect("index")
         if payment <= 0 or payout <= 0:
-            messages.error("Please enter positive numbers only")
+            messages.error(request, "Please enter positive numbers only")
             return redirect("index")
         if request.POST["send_asset"] == "BTC":
             payment_asset = Asset.objects.get(code="BTC")
@@ -58,12 +59,14 @@ class IndexView(View):
             payout_asset = Asset.objects.get(code="BTC")
         if -payment.as_tuple().exponent > payment_asset.decimal_places:
             messages.error(
-                f"Please enter a maximum of {payment_asset.decimal_places} decimal places for {payment_asset.name}"
+                request,
+                f"Please enter a maximum of {payment_asset.decimal_places} decimal places for {payment_asset.name}",
             )
             return redirect("index")
         if -payout.as_tuple().exponent > payout_asset.decimal_places:
             messages.error(
-                f"Please enter a maximum of {payout_asset.decimal_places} decimal places for {payout_asset.name}"
+                request,
+                f"Please enter a maximum of {payout_asset.decimal_places} decimal places for {payout_asset.name}",
             )
             return redirect("index")
         ask, bid = get_kraken_ask_bid()
@@ -71,18 +74,19 @@ class IndexView(View):
         bid = bid * Decimal("0.9925")
         if request.POST["send_asset"] == "BTC":
             if payment / (payout + payout_asset.transaction_fee) < ask:
-                messages.error("Offer expired, please try again")
+                messages.error(request, "Offer expired, please try again")
                 return redirect("index")
         else:
             if (payout + payout_asset.transaction_fee) / payment > bid:
-                messages.error("Offer expired, please try again")
+                messages.error(request, "Offer expired, please try again")
                 return redirect("index")
         maximum_payout_amount = (
             payout_asset.exchange_balance - payout_asset.transaction_fee
         )
         if payout > maximum_payout_amount:
             messages.error(
-                f"Not enough funds on exchange to complete order, maximum payout amount is {maximum_payout_amount} {payout_asset.code}"
+                request,
+                f"Not enough funds on exchange to complete order, maximum payout amount is {maximum_payout_amount} {payout_asset.code}",
             )
             return redirect("index")
 

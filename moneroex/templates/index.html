@@ -5,6 +5,10 @@
   input[type=text] { padding: 1em; }
   input[type=submit] { padding: 1em; }
   #swap { border: none; padding: 1em 0; margin: 0; background-color: #fff; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  li { list-style: none; padding: 1em; background-color: #999; margin: 0; }
+  li.error { background-color: #c99; }
+  li.success { background-color: #9c9; }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 <script src="{% static 'decimal.js' %}"></script>
@@ -65,6 +69,13 @@
 <form method="post">
   {% csrf_token %}
   <input type="hidden" id="send-asset-form-field" name="send_asset" value="BTC"/>
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   <table>
     <tr>
       <td>You send:</td>
