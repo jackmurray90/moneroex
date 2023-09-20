@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from moneroex.views import IndexView
+from moneroex.views import IndexView, OrderView
 
 urlpatterns = [
     path("", IndexView.as_view(), name="index"),
+    path("order/<id>", OrderView.as_view(), name="order"),
     path("admin/", admin.site.urls),
 ]
