@@ -10,4 +10,8 @@ class IndexView(View):
         with urlopen("https://api.kraken.com/0/public/Ticker?pair=XXMRXXBT") as f:
             data = loads(f.read().decode("utf-8"))
         ask, bid = [Decimal(data["result"]["XXMRXXBT"][i][0]) for i in "ab"]
-        return render(request, "index.html", {"ask": ask*Decimal("1.01"), "bid": bid*Decimal("0.99")})
+        return render(
+            request,
+            "index.html",
+            {"ask": ask * Decimal("1.01"), "bid": bid * Decimal("0.99")},
+        )
