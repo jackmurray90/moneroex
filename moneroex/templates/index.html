@@ -23,6 +23,10 @@
     const m = Decimal.pow(10, n);
     return x.mul(m).floor().div(m);
   }
+  function roundUpToNDecimalPlaces(x, n) {
+    const m = Decimal.pow(10, n);
+    return x.mul(m).ceil().div(m);
+  }
   function calculateReceive() {
     const sendAsset = document.getElementById("send-asset").textContent;
     const send = document.getElementById("send-form-field").value;
@@ -38,8 +42,8 @@
     const receive = document.getElementById("receive-form-field").value;
     const send = (
       sendAsset === "BTC"
-      ? roundToNDecimalPlaces(new Decimal(receive).mul("{{ ask }}"), 8)
-      : roundToNDecimalPlaces(new Decimal(receive).div("{{ bid }}"), 12)
+      ? roundUpToNDecimalPlaces(new Decimal(receive).mul("{{ ask }}"), 8)
+      : roundUpToNDecimalPlaces(new Decimal(receive).div("{{ bid }}"), 12)
     );
     document.getElementById("send-form-field").value = send;
   }
