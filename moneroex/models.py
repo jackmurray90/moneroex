@@ -1,10 +1,14 @@
 from django.db import models
 
+MAX_AMOUNT = 10**10
+
 
 class Asset(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=3)
     decimal_places = models.IntegerField()
+    transaction_fee = models.DecimalField(max_digits=28, decimal_places=18)
+    exchange_balance = models.DecimalField(max_digits=28, decimal_places=18, default=0)
 
 
 class Order(models.Model):

@@ -35,15 +35,26 @@
       ? roundToNDecimalPlaces(new Decimal(send).div("{{ ask }}"), 12)
       : roundToNDecimalPlaces(new Decimal(send).mul("{{ bid }}"), 8)
     );
-    document.getElementById("receive-form-field").value = receive;
+    const transactionFee = (
+      sendAsset === "BTC"
+      ? new Decimal("{{ xmr_transaction_fee }}")
+      : new Decimal("{{ btc_transaction_fee }}")
+    );
+    document.getElementById("receive-form-field").value = Decimal.max(0, receive.sub(transactionFee));
   }
   function calculateSend() {
     const sendAsset = document.getElementById("send-asset").textContent;
     const receive = document.getElementById("receive-form-field").value;
+    const transactionFee = (
+      sendAsset === "BTC"
+      ? new Decimal("{{ xmr_transaction_fee }}")
+      : new Decimal("{{ btc_transaction_fee }}")
+    );
+    const receivePlusTransactionFee = Decimal.add(receive, transactionFee);
     const send = (
       sendAsset === "BTC"
-      ? roundUpToNDecimalPlaces(new Decimal(receive).mul("{{ ask }}"), 8)
-      : roundUpToNDecimalPlaces(new Decimal(receive).div("{{ bid }}"), 12)
+      ? roundUpToNDecimalPlaces(new Decimal(receivePlusTransactionFee).mul("{{ ask }}"), 8)
+      : roundUpToNDecimalPlaces(new Decimal(receivePlusTransactionFee).div("{{ bid }}"), 12)
     );
     document.getElementById("send-form-field").value = send;
   }
