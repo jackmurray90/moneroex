@@ -9,9 +9,9 @@ class Command(BaseCommand):
     help = "Seed database with assets"
 
     def handle(self, *args, **kwargs):
-        for name, code, decimal_places, transaction_fee in [
-            ("Bitcoin", "BTC", 8, Decimal("0.0001")),
-            ("Monero", "XMR", 12, Decimal("0.0001")),
+        for name, code, decimal_places, transaction_fee, confirmations in [
+            ("Bitcoin", "BTC", 8, Decimal("0.0001"), 2),
+            ("Monero", "XMR", 12, Decimal("0.0001"), 10),
         ]:
             try:
                 Asset.objects.get(code=code)
@@ -21,4 +21,5 @@ class Command(BaseCommand):
                     code=code,
                     decimal_places=decimal_places,
                     transaction_fee=transaction_fee,
+                    confirmations=confirmations,
                 )

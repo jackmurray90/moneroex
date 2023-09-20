@@ -9,6 +9,7 @@ class Asset(models.Model):
     decimal_places = models.IntegerField()
     transaction_fee = models.DecimalField(max_digits=28, decimal_places=18)
     exchange_balance = models.DecimalField(max_digits=28, decimal_places=18, default=0)
+    confirmations = models.IntegerField()
 
 
 class Order(models.Model):
