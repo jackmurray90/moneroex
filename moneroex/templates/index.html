@@ -1,0 +1,77 @@
+{% load static %}
+<style>
+  html, body { margin: 0; padding: 0; }
+  form { width: 30em; margin: 10em auto; }
+  input[type=text] { padding: 1em; }
+  input[type=submit] { padding: 1em; }
+  #swap { border: none; padding: 1em 0; margin: 0; background-color: #fff; }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+<script src="{% static 'decimal.js' %}"></script>
+<script>
+  function mySwap() {
+    const sendAsset = document.getElementById("send-asset").textContent;
+    const newSendAsset = (sendAsset === "BTC" ? "XMR" : "BTC");
+    const newReceiveAsset = (sendAsset === "BTC" ? "BTC" : "XMR");
+    document.getElementById("send-asset-form-field").value = newSendAsset;
+    document.getElementById("send-asset").textContent = newSendAsset;
+    document.getElementById("receive-asset").textContent = newReceiveAsset;
+    document.getElementById("send-form-field").value = (newSendAsset === 'BTC' ? '0.1' : '10');
+    calculateReceive();
+  }
+  function roundToNDecimalPlaces(x, n) {
+    const m = Decimal.pow(10, n);
+    return x.mul(m).floor().div(m);
+  }
+  function calculateReceive() {
+    const sendAsset = document.getElementById("send-asset").textContent;
+    const send = document.getElementById("send-form-field").value;
+    const receive = (
+      sendAsset === "BTC"
+      ? roundToNDecimalPlaces(new Decimal(send).div("{{ ask }}"), 12)
+      : roundToNDecimalPlaces(new Decimal(send).mul("{{ bid }}"), 8)
+    );
+    document.getElementById("receive-form-field").value = receive;
+  }
+  function calculateSend() {
+    const sendAsset = document.getElementById("send-asset").textContent;
+    const receive = document.getElementById("receive-form-field").value;
+    const send = (
+      sendAsset === "BTC"
+      ? roundToNDecimalPlaces(new Decimal(receive).mul("{{ ask }}"), 8)
+      : roundToNDecimalPlaces(new Decimal(receive).div("{{ bid }}"), 12)
+    );
+    document.getElementById("send-form-field").value = send;
+  }
+  window.onload = function() {
+    calculateReceive();
+  };
+</script>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" id="send-asset-form-field" name="send_asset" value="BTC"/>
+  <table>
+    <tr>
+      <td>You send:</td>
+      <td>
+        <input type="text" id="send-form-field" name="send" onInput="calculateReceive()" value="0.1"/>
+        <span id="send-asset">BTC</span>
+      </td>
+      <td rowspan="2">
+        <button id="swap" type="button" onClick="mySwap();">
+          <span class="material-symbols-outlined">swap_vert</span>
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td>You receive:</td>
+      <td>
+        <input type="text" id="receive-form-field" name="receive" onInput="calculateSend()"/>
+        <span id="receive-asset">XMR</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style="text-align: center"><input type="submit" value="Make purchase"/></td>
+    </tr>
+  </table>
+</form>
