@@ -4,10 +4,34 @@
   html, body { margin: 0; padding: 0; }
   form { width: 30em; margin: 10em auto; }
   input[type=text] { padding: 1em; }
+  input[type=text].payout-address { display: block; width: 100%; }
   input[type=submit] { padding: 1em; }
   #swap { border: none; padding: 1em 0; margin: 0; background-color: #fff; }
 </style>
-<p>Order {{ order.id }} to exchange {{ order.payment_amount|asset:order.payment_asset }} for {{ order.payout_amount|asset:order.payout_asset }}.</p>
 <form method="post">
   {% csrf_token %}
+  <table>
+    <tr>
+      <td>Order id:</td>
+      <td>{{ order.id }}</td>
+    </tr>
+    <tr>
+      <td>You send:</td>
+      <td>{{ order.payment_amount|asset:order.payment_asset }}</td>
+    </tr>
+    <tr>
+      <td>You receive:</td>
+      <td>{{ order.payout_amount|asset:order.payout_asset }}.</td>
+    </tr>
+  </table>
+  {% if not order.payout_address %}
+    <p>Please provide a {{ order.payout_asset.name }} address for payout:</p>
+    <input type="text" class="payout-address" name="payout_address"/>
+    <input type="submit" value="Submit"/>
+  {% else %}
+    <p>Please send {{ order.payment_amount|asset:order.payment_asset }} to the following address:</p>
+    <p>{{ order.payment_address }}</p>
+    <p>After we receive it with {{ order.payment_asset.confirmations }} confirmations, we will initiate a transfer of {{ order.payout_amount|asset:order.payout_asset }} to the following address:</p>
+    <p>{{ order.payout_address }}</p>
+  {% endif %}
 </form>
